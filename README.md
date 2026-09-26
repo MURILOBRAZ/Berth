@@ -27,7 +27,7 @@ Reproduzir o tipo de acompanhamento que terminais portuários e exportadores faz
 
 ```
 ingest/      scripts de download e carga dos dados
-sql/         transformações e modelo analítico
+sql/         transformações e modelo analítico (seeds/ = tabelas de apoio)
 data/        dados brutos e tratados (não versionados)
 dashboard/   arquivo do Power BI e capturas de tela
 docs/        dicionário de KPIs e notas sobre os dados
@@ -42,7 +42,10 @@ pip install -r requirements.txt
 
 python ingest/download.py       # baixa ~1 GB do Comex Stat (2023 até o ano atual)
 python ingest/build_db.py       # monta data/berth.duckdb
+python ingest/export_powerbi.py  # gera data/powerbi/*.parquet para o Power BI
 ```
+
+Passo a passo do dashboard (relacionamentos, medidas DAX e páginas): [docs/powerbi.md](docs/powerbi.md).
 
 ## Modelo de dados
 
@@ -52,7 +55,7 @@ Esquema estrela em `data/berth.duckdb`:
 |---|---|
 | `fato_comercio` | Exportação e importação **por via marítima**, por mês, NCM, país, UF e unidade da Receita Federal (toneladas e valor FOB em US$) |
 | `dim_ncm` | Mercadoria com hierarquia SH2 / SH4 / seção |
-| `dim_urf` | Unidade da Receita Federal de despacho (na via marítima, equivale ao porto) |
+| `dim_porto` | Porto/complexo portuário, UF, região e coordenadas, a partir da unidade da Receita Federal de despacho (mapeamento em `sql/seeds/portos_urf.csv`) |
 | `dim_pais`, `dim_uf`, `dim_data` | País parceiro, estado de origem/destino e calendário |
 
 ## Fontes dos dados

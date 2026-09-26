@@ -18,3 +18,17 @@ FROM read_csv(
     filename = true
 )
 WHERE CO_VIA = '01';
+
+-- Calendário mensal cobrindo anos completos do período com dados.
+CREATE OR REPLACE TABLE dim_data AS
+SELECT
+    d::DATE AS data,
+    year(d) AS ano,
+    month(d) AS mes,
+    quarter(d) AS trimestre,
+    strftime(d, '%m/%Y') AS mes_ano
+FROM range(
+    (SELECT date_trunc('year', min(data)) FROM fato_comercio),
+    (SELECT make_date(year(max(data)) + 1, 1, 1) FROM fato_comercio),
+    INTERVAL 1 MONTH
+) t(d);

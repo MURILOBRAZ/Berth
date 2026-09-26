@@ -22,7 +22,14 @@ CREATE OR REPLACE TABLE dim_uf AS
 SELECT
     SG_UF AS sg_uf,
     NO_UF AS no_uf,
-    NO_REGIAO AS no_regiao
+    CASE NO_REGIAO
+        WHEN 'REGIAO NORTE' THEN 'Norte'
+        WHEN 'REGIAO NORDESTE' THEN 'Nordeste'
+        WHEN 'REGIAO CENTRO OESTE' THEN 'Centro-Oeste'
+        WHEN 'REGIAO SUDESTE' THEN 'Sudeste'
+        WHEN 'REGIAO SUL' THEN 'Sul'
+        ELSE 'Não declarada'
+    END AS no_regiao
 FROM read_csv('data/raw/comexstat/tabelas/UF.csv',
     encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false);
 
@@ -40,12 +47,3 @@ FROM read_csv('data/raw/comexstat/tabelas/NCM.csv',
 LEFT JOIN read_csv('data/raw/comexstat/tabelas/NCM_SH.csv',
     encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false) sh
     ON sh.CO_SH6 = n.CO_SH6;
-
-CREATE OR REPLACE TABLE dim_data AS
-SELECT
-    d::DATE AS data,
-    year(d) AS ano,
-    month(d) AS mes,
-    quarter(d) AS trimestre,
-    strftime(d, '%m/%Y') AS mes_ano
-FROM range(DATE '2015-01-01', DATE '2031-01-01', INTERVAL 1 MONTH) t(d);
