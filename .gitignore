@@ -1,0 +1,16 @@
+# dados (baixados pelos scripts de ingestão)
+data/*
+!data/.gitkeep
+*.duckdb
+*.duckdb.wal
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Power BI (arquivos temporários)
+~$*
+*.pbix.bak
