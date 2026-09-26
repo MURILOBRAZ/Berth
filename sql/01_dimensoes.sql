@@ -1,0 +1,51 @@
+-- Dimensões a partir das tabelas auxiliares do Comex Stat.
+-- Os arquivos são latin-1 e alguns têm descrições com aspas sem escape
+-- (ex.: 45", "oriented strand board"), então o dialeto é fixado e o modo
+-- estrito desligado. Contagens conferidas contra os códigos do arquivo bruto.
+
+CREATE OR REPLACE TABLE dim_urf AS
+SELECT
+    CO_URF AS co_urf,
+    regexp_replace(NO_URF, '^\d+ - ', '') AS no_urf
+FROM read_csv('data/raw/comexstat/tabelas/URF.csv',
+    encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false);
+
+CREATE OR REPLACE TABLE dim_pais AS
+SELECT
+    CO_PAIS AS co_pais,
+    CO_PAIS_ISOA3 AS iso3,
+    NO_PAIS AS no_pais
+FROM read_csv('data/raw/comexstat/tabelas/PAIS.csv',
+    encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false);
+
+CREATE OR REPLACE TABLE dim_uf AS
+SELECT
+    SG_UF AS sg_uf,
+    NO_UF AS no_uf,
+    NO_REGIAO AS no_regiao
+FROM read_csv('data/raw/comexstat/tabelas/UF.csv',
+    encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false);
+
+CREATE OR REPLACE TABLE dim_ncm AS
+SELECT
+    n.CO_NCM AS co_ncm,
+    n.NO_NCM_POR AS no_ncm,
+    sh.CO_SH4 AS co_sh4,
+    sh.NO_SH4_POR AS no_sh4,
+    sh.CO_SH2 AS co_sh2,
+    sh.NO_SH2_POR AS no_sh2,
+    sh.NO_SEC_POR AS no_secao
+FROM read_csv('data/raw/comexstat/tabelas/NCM.csv',
+    encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false) n
+LEFT JOIN read_csv('data/raw/comexstat/tabelas/NCM_SH.csv',
+    encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false) sh
+    ON sh.CO_SH6 = n.CO_SH6;
+
+CREATE OR REPLACE TABLE dim_data AS
+SELECT
+    d::DATE AS data,
+    year(d) AS ano,
+    month(d) AS mes,
+    quarter(d) AS trimestre,
+    strftime(d, '%m/%Y') AS mes_ano
+FROM range(DATE '2015-01-01', DATE '2031-01-01', INTERVAL 1 MONTH) t(d);

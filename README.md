@@ -1,6 +1,6 @@
 # Berth ⚓
 
-Dashboard de KPIs portuários construído com dados públicos da **ANTAQ** (Estatístico Aquaviário), com foco no Porto de Santos e na comparação entre terminais.
+Dashboard de KPIs portuários construído com dados públicos do **Comex Stat** (MDIC) e da **ANTAQ**, com foco no Porto de Santos e na comparação entre portos e terminais.
 
 > 🚧 Em desenvolvimento
 
@@ -19,7 +19,7 @@ Reproduzir o tipo de acompanhamento que terminais portuários e exportadores faz
 
 ## Stack
 
-- **Python + DuckDB**: download e tratamento dos dados da ANTAQ
+- **Python + DuckDB**: download e tratamento dos dados
 - **SQL**: modelagem em esquema estrela (fatos e dimensões)
 - **Power BI**: dashboard
 
@@ -33,6 +33,35 @@ dashboard/   arquivo do Power BI e capturas de tela
 docs/        dicionário de KPIs e notas sobre os dados
 ```
 
-## Fonte dos dados
+## Como rodar
 
-[ANTAQ — Estatístico Aquaviário](https://web3.antaq.gov.br/ea/sense/download.html) (dados abertos).
+```bash
+python -m venv .venv
+.venv\Scripts\activate          # Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+
+python ingest/download.py       # baixa ~1 GB do Comex Stat (2023 até o ano atual)
+python ingest/build_db.py       # monta data/berth.duckdb
+```
+
+## Modelo de dados
+
+Esquema estrela em `data/berth.duckdb`:
+
+| Tabela | Conteúdo |
+|---|---|
+| `fato_comercio` | Exportação e importação **por via marítima**, por mês, NCM, país, UF e unidade da Receita Federal (toneladas e valor FOB em US$) |
+| `dim_ncm` | Mercadoria com hierarquia SH2 / SH4 / seção |
+| `dim_urf` | Unidade da Receita Federal de despacho (na via marítima, equivale ao porto) |
+| `dim_pais`, `dim_uf`, `dim_data` | País parceiro, estado de origem/destino e calendário |
+
+## Fontes dos dados
+
+- **[Comex Stat (MDIC)](https://comexstat.mdic.gov.br/)**: base atual, com volumes e valores de comércio exterior por porto.
+- **[ANTAQ – Estatístico Aquaviário](https://estatistica.antaq.gov.br/ea/sense/download.html)**: planejado, para tempos de navio, ocupação de berço e comparação entre terminais. O download exige um navegador, então os arquivos precisam ser baixados manualmente.
+
+### Limitações
+
+- O Comex Stat registra a **unidade aduaneira** de despacho, não o terminal. Algumas unidades cobrem um complexo inteiro (ex.: *IRF São Luís* inclui Itaqui e Ponta da Madeira).
+- Não há dados de contêineres/TEU nem de tempos de operação. Esses KPIs virão da ANTAQ.
+- O ano corrente é parcial, e o MDIC atualiza os dados mensalmente.
