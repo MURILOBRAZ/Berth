@@ -1,0 +1,20 @@
+relationship 3977962b-ce08-4b09-974b-e326f73ba954
+	fromColumn: fato_comercio.data
+	toColumn: dim_data.Data
+
+relationship 66e51f38-62ba-4908-8d73-b00802592974
+	fromColumn: fato_comercio.co_ncm
+	toColumn: dim_ncm.co_ncm
+
+relationship 3416dabf-b822-44fa-a87d-5adc59c93ad1
+	fromColumn: fato_comercio.co_pais
+	toColumn: dim_pais.co_pais
+
+relationship 30930a4d-d865-4dc8-afac-7db79dd7ebdb
+	fromColumn: fato_comercio.co_urf
+	toColumn: dim_porto.co_urf
+
+relationship d3e2901e-c113-40f2-a916-1ab1d52de3a1
+	fromColumn: fato_comercio.sg_uf
+	toColumn: dim_uf.UF
+

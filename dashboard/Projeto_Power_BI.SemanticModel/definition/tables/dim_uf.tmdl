@@ -1,0 +1,32 @@
+table dim_uf
+	lineageTag: a6ea85ad-0c57-4560-976a-1eda622cb9ba
+
+	column UF
+		dataType: string
+		lineageTag: bc5452f6-71c6-4b18-afce-1e22d01b386e
+		summarizeBy: none
+		sourceColumn: sg_uf
+
+	column Estado
+		dataType: string
+		lineageTag: f49a5559-e62e-4dc4-bc2d-11ebbf721e1a
+		dataCategory: StateOrProvince
+		summarizeBy: none
+		sourceColumn: no_uf
+
+	column Região
+		dataType: string
+		lineageTag: 508405bb-e6f7-4086-b22c-6fb2f6305d93
+		summarizeBy: none
+		sourceColumn: no_regiao
+
+	partition dim_uf = m
+		mode: import
+		source =
+				let
+					Fonte = Parquet.Document(File.Contents(PastaDados & "dim_uf.parquet"))
+				in
+					Fonte
+
+	annotation PBI_ResultType = Table
+

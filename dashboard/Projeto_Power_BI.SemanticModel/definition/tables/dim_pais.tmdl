@@ -1,0 +1,33 @@
+table dim_pais
+	lineageTag: a05f2c15-1579-47bb-9ba2-0fdbfc6b441c
+
+	column co_pais
+		dataType: string
+		isHidden
+		lineageTag: 50ca6245-b138-477d-beba-ed10c2fd03b9
+		summarizeBy: none
+		sourceColumn: co_pais
+
+	column ISO3
+		dataType: string
+		lineageTag: 04c849bc-1538-4856-b123-30a6f8795f04
+		summarizeBy: none
+		sourceColumn: iso3
+
+	column País
+		dataType: string
+		lineageTag: 88e6f965-9888-43ad-b319-deb916f93de2
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: no_pais
+
+	partition dim_pais = m
+		mode: import
+		source =
+				let
+					Fonte = Parquet.Document(File.Contents(PastaDados & "dim_pais.parquet"))
+				in
+					Fonte
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,5 @@
+expression PastaDados = "C:\Users\muril\OneDrive\Documentos\Meu_GitHub\Berth\data\powerbi\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: de003d64-32b1-4a6b-a5a6-b657cb7e17c4
+
+	annotation PBI_ResultType = Text
+

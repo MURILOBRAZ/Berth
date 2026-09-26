@@ -1,0 +1,71 @@
+table fato_comercio
+	lineageTag: 3987740d-2393-49a9-a82e-a31fdc708c47
+
+	column Fluxo
+		dataType: string
+		lineageTag: e154a47a-ab0b-498c-a4d7-3072ad1cda81
+		summarizeBy: none
+		sourceColumn: fluxo
+
+	column data
+		dataType: dateTime
+		isHidden
+		formatString: dd/mm/yyyy
+		lineageTag: 9967a7d3-de4e-48e7-a841-3e39a5a4a795
+		summarizeBy: none
+		sourceColumn: data
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column co_ncm
+		dataType: string
+		isHidden
+		lineageTag: a300b6da-5f1a-4a72-93df-877a90304530
+		summarizeBy: none
+		sourceColumn: co_ncm
+
+	column co_pais
+		dataType: string
+		isHidden
+		lineageTag: 312d80bd-a9bf-4c63-81a7-4643d47d1062
+		summarizeBy: none
+		sourceColumn: co_pais
+
+	column sg_uf
+		dataType: string
+		isHidden
+		lineageTag: 0e250516-1764-4abf-8844-cdac6726cf86
+		summarizeBy: none
+		sourceColumn: sg_uf
+
+	column co_urf
+		dataType: string
+		isHidden
+		lineageTag: dea1bd56-9ad9-4855-9cc4-ab882150df45
+		summarizeBy: none
+		sourceColumn: co_urf
+
+	column toneladas
+		dataType: double
+		isHidden
+		lineageTag: 21590edd-8e8c-4e9e-84be-9fd655214dc6
+		summarizeBy: none
+		sourceColumn: toneladas
+
+	column valor_fob_usd
+		dataType: double
+		isHidden
+		lineageTag: f7e0de2c-816b-480d-b622-79ba2f30e01b
+		summarizeBy: none
+		sourceColumn: valor_fob_usd
+
+	partition fato_comercio = m
+		mode: import
+		source =
+				let
+					Fonte = Parquet.Document(File.Contents(PastaDados & "fato_comercio.parquet"))
+				in
+					Fonte
+
+	annotation PBI_ResultType = Table
+

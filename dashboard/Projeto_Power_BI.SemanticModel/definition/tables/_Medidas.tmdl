@@ -1,0 +1,124 @@
+table _Medidas
+	lineageTag: 5423a354-d908-4e31-a675-94aa6870766f
+
+	/// Peso líquido movimentado, em toneladas.
+	measure Toneladas = SUM ( fato_comercio[toneladas] )
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 5cc6cfdb-3b76-483e-bb01-d60cfcd6df3f
+
+	/// Toneladas no fluxo de exportação.
+	measure 'Toneladas Exportadas' = CALCULATE ( [Toneladas], fato_comercio[Fluxo] = "Exportação" )
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 8d00cb95-a427-45e0-a2ab-26a14bc35d2d
+
+	/// Toneladas no fluxo de importação.
+	measure 'Toneladas Importadas' = CALCULATE ( [Toneladas], fato_comercio[Fluxo] = "Importação" )
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 958dfc0c-febc-4897-b0d8-be7543a0b3d8
+
+	/// Movimentação física: exclui o petróleo bruto exportado direto das plataformas (ver docs/insights.md).
+	measure 'Toneladas sem Petróleo Bruto' = CALCULATE ( [Toneladas], dim_ncm[Grupo de Carga] <> "Petróleo bruto" )
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: eded3a58-9e2e-44fc-9f55-4aff3522e964
+
+	/// Valor FOB em dólares.
+	measure 'Valor FOB (US$)' = SUM ( fato_comercio[valor_fob_usd] )
+		formatString: \$#,0
+		displayFolder: Valor
+		lineageTag: a9de414d-a4c8-4d01-83f2-e7ba7906f5e9
+
+	/// Densidade de valor da carga (FOB / toneladas).
+	measure 'US$ por Tonelada' = DIVIDE ( [Valor FOB (US$)], [Toneladas] )
+		formatString: \$#,0
+		displayFolder: Valor
+		lineageTag: dd10b8aa-5a3c-4933-a593-6c148272c2c4
+
+	/// Último mês com dados na base (o ano corrente é parcial).
+	measure 'Último Mês' = CALCULATE ( MAX ( fato_comercio[data] ), ALL ( fato_comercio ) )
+		formatString: mmm/yyyy
+		displayFolder: Comparação
+		lineageTag: fbca7d76-5e3f-439c-8b5d-f615f6d61ec6
+
+	/// Toneladas limitadas ao último mês com dados.
+	measure 'Toneladas Período' =
+			VAR UltimoMes = [Último Mês]
+			RETURN
+				CALCULATE ( [Toneladas], KEEPFILTERS ( dim_data[Data] <= UltimoMes ) )
+		formatString: #,0
+		displayFolder: Comparação
+		lineageTag: 6401d14f-5e77-4666-b615-3af65135910d
+
+	/// Ano anterior no mesmo período: jan–ago/2026 é comparado com jan–ago/2025, não com 2025 inteiro.
+	measure 'Toneladas AA' =
+			VAR UltimoMes = [Último Mês]
+			RETURN
+				CALCULATE (
+					[Toneladas],
+					SAMEPERIODLASTYEAR (
+						FILTER ( VALUES ( dim_data[Data] ), dim_data[Data] <= UltimoMes )
+					)
+				)
+		formatString: #,0
+		displayFolder: Comparação
+		lineageTag: 60403fb5-e862-478c-9922-b0646c2b22ec
+
+	/// Variação em relação ao mesmo período do ano anterior.
+	measure 'Var % A/A' = DIVIDE ( [Toneladas Período] - [Toneladas AA], [Toneladas AA] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Comparação
+		lineageTag: 9748c2e6-cf2c-47bc-8029-eb72adbaad7b
+
+	/// Acumulado desde janeiro do ano no contexto.
+	measure 'Toneladas Acumulado Ano' = TOTALYTD ( [Toneladas], dim_data[Data] )
+		formatString: #,0
+		displayFolder: Comparação
+		lineageTag: f2a0f1cc-4c37-4bda-bfaa-e082ff35c8bd
+
+	/// Participação do porto no total do Brasil, respeitando os demais filtros.
+	measure 'Market Share Porto' = DIVIDE ( [Toneladas], CALCULATE ( [Toneladas], ALL ( dim_porto ) ) )
+		formatString: 0.0%
+		displayFolder: Participação
+		lineageTag: 81980833-8683-45b5-ae17-1a51cb62f935
+
+	/// Peso da mercadoria dentro do porto ou recorte selecionado.
+	measure 'Participação no Mix' = DIVIDE ( [Toneladas], CALCULATE ( [Toneladas], ALL ( dim_ncm ) ) )
+		formatString: 0.0%
+		displayFolder: Participação
+		lineageTag: 677eb92b-c417-4a2b-8cbf-ab92fc837b07
+
+	/// Posição do porto por toneladas.
+	measure 'Rank Porto' =
+			-- arredonda para a tonelada: somas em ordens diferentes geram diferenças de ponto flutuante
+			IF (
+			    HASONEVALUE ( dim_porto[Porto] ),
+			    RANKX (
+			        ALL ( dim_porto[Porto] ),
+			        ROUND ( [Toneladas], 0 ),
+			        ROUND ( [Toneladas], 0 ),
+			        DESC,
+			        DENSE
+			    )
+			)
+		formatString: 0
+		displayFolder: Participação
+		lineageTag: c671da9c-e7e3-4b03-a600-6ef09998753e
+
+	column Coluna
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 75c9e7ef-50ef-4271-911d-da8f2fda2b3e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Coluna]
+
+	partition _Medidas = calculated
+		mode: import
+		source = ROW ( "Coluna", 0 )
+
+	annotation PBI_ResultType = Table
+

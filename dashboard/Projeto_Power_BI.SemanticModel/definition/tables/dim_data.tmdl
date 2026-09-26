@@ -1,0 +1,52 @@
+table dim_data
+	lineageTag: d559fd45-7e6a-4c01-8e10-08c669174cd3
+	dataCategory: Time
+
+	column Data
+		dataType: dateTime
+		isKey
+		formatString: dd/mm/yyyy
+		lineageTag: 1bc43780-fa73-49a0-bfa6-a2cd86910d7f
+		summarizeBy: none
+		sourceColumn: data
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Ano
+		dataType: int64
+		formatString: 0
+		lineageTag: 393ef4f9-bb4a-4485-bb8b-b9ba465cab7e
+		summarizeBy: none
+		sourceColumn: ano
+
+	column Mês
+		dataType: int64
+		formatString: 0
+		lineageTag: 83d4a386-6537-4e51-9647-2b8b13a3f1b2
+		summarizeBy: none
+		sourceColumn: mes
+
+	column Trimestre
+		dataType: int64
+		formatString: 0
+		lineageTag: acad02cd-6f14-4fc4-be69-dbadd367cb42
+		summarizeBy: none
+		sourceColumn: trimestre
+
+	column Mês/Ano
+		dataType: string
+		lineageTag: c908d00a-fbe7-4d64-a69c-ca4a29e4c228
+		summarizeBy: none
+		sourceColumn: mes_ano
+		sortByColumn: Data
+
+	partition dim_data = m
+		mode: import
+		source =
+				let
+					Fonte = Parquet.Document(File.Contents(PastaDados & "dim_data.parquet"))
+				in
+					Fonte
+
+	annotation PBI_ResultType = Table
+

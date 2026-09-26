@@ -1,0 +1,63 @@
+table dim_ncm
+	lineageTag: e2820078-d896-44e8-ae0c-c9d8c09573dc
+
+	column co_ncm
+		dataType: string
+		isHidden
+		lineageTag: d7f02733-2d2d-410a-b48e-2ddfdae2979c
+		summarizeBy: none
+		sourceColumn: co_ncm
+
+	column NCM
+		dataType: string
+		lineageTag: fccd1ee0-c2ca-4f6d-ba83-e2bb61711152
+		summarizeBy: none
+		sourceColumn: no_ncm
+
+	column 'Código SH4'
+		dataType: string
+		lineageTag: 0b7b8543-4e5a-4efe-96a7-daf6fb7b1c72
+		summarizeBy: none
+		sourceColumn: co_sh4
+
+	column SH4
+		dataType: string
+		lineageTag: 2ba1b414-c230-40c0-af49-0f2988202138
+		summarizeBy: none
+		sourceColumn: no_sh4
+
+	column 'Código SH2'
+		dataType: string
+		isHidden
+		lineageTag: 70f24b31-9ac7-465a-93ef-ce051f9e3152
+		summarizeBy: none
+		sourceColumn: co_sh2
+
+	column SH2
+		dataType: string
+		lineageTag: cd9c51ae-d7e4-4f52-b6ad-e5a99a7428dc
+		summarizeBy: none
+		sourceColumn: no_sh2
+
+	column Seção
+		dataType: string
+		lineageTag: 3373bf17-102f-414a-a250-63c90fe47cbf
+		summarizeBy: none
+		sourceColumn: no_secao
+
+	column 'Grupo de Carga'
+		dataType: string
+		lineageTag: 6805f3b6-7115-4b53-9dfb-cb54f40df3ce
+		summarizeBy: none
+		sourceColumn: grupo_carga
+
+	partition dim_ncm = m
+		mode: import
+		source =
+				let
+					Fonte = Parquet.Document(File.Contents(PastaDados & "dim_ncm.parquet"))
+				in
+					Fonte
+
+	annotation PBI_ResultType = Table
+
