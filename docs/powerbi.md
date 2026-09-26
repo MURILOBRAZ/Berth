@@ -33,6 +33,7 @@ Ajustes:
 - `dim_data[mes_ano]`: **Classificar por coluna** `data`.
 - `dim_porto[lat]` / `[lon]`: categoria de dados **Latitude** / **Longitude**.
 - Ocultar as colunas de código da fato (`co_ncm`, `co_pais`, `co_urf`, `sg_uf`).
+- `dim_ncm[grupo_carga]` agrupa as principais cargas portuárias (minério, soja, celulose...). Use como filtro e legenda no lugar do SH4.
 - `fato_comercio[sg_uf]` é o estado **produtor** (exportação) ou **consumidor** (importação) da mercadoria, não o estado do porto.
 
 ## 4. Medidas (DAX)
@@ -83,6 +84,10 @@ DIVIDE ( [Toneladas], CALCULATE ( [Toneladas], ALL ( dim_porto ) ) )
 Participação no Mix =
 DIVIDE ( [Toneladas], CALCULATE ( [Toneladas], ALL ( dim_ncm ) ) )
 
+-- Movimentação física: exclui petróleo bruto exportado das plataformas (ver docs/insights.md)
+Toneladas sem Petróleo Bruto =
+CALCULATE ( [Toneladas], dim_ncm[grupo_carga] <> "Petróleo bruto" )
+
 -- Rank do porto por volume
 Rank Porto =
 IF (
@@ -101,7 +106,7 @@ Formatos sugeridos: toneladas em milhões (`#,0.0,, "Mt"`), FOB em bilhões (`$#
 | **Ranking de portos** | Barras por porto com market share. Mapa (bolhas por `lat`/`lon`, tamanho = toneladas). Matriz porto × ano. |
 | **Porto de Santos** | Porto pré-filtrado: mix por SH4 (treemap), top destinos, sazonalidade (mês × ano) e estados de origem. |
 | **Celulose** | SH4 4703: toneladas por porto, destinos (China, EUA, Europa), US$/t ao longo do tempo. |
-| **Insights** | 3 a 5 conclusões em texto, cada uma com o número que a sustenta. |
+| **Insights** | As conclusões de [insights.md](insights.md), cada uma com o visual que a sustenta. |
 
 ## Observações sobre os dados
 

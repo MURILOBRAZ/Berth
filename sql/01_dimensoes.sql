@@ -41,9 +41,13 @@ SELECT
     sh.NO_SH4_POR AS no_sh4,
     sh.CO_SH2 AS co_sh2,
     sh.NO_SH2_POR AS no_sh2,
-    sh.NO_SEC_POR AS no_secao
+    sh.NO_SEC_POR AS no_secao,
+    -- grupos das principais cargas portuárias (sql/seeds/grupos_carga.csv)
+    coalesce(g.grupo_carga, 'Outras cargas') AS grupo_carga
 FROM read_csv('data/raw/comexstat/tabelas/NCM.csv',
     encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false) n
 LEFT JOIN read_csv('data/raw/comexstat/tabelas/NCM_SH.csv',
     encoding = 'latin-1', all_varchar = true, delim = ';', quote = '"', header = true, strict_mode = false) sh
-    ON sh.CO_SH6 = n.CO_SH6;
+    ON sh.CO_SH6 = n.CO_SH6
+LEFT JOIN read_csv('sql/seeds/grupos_carga.csv', delim = ';', header = true, all_varchar = true) g
+    ON g.co_sh4 = sh.CO_SH4;

@@ -30,7 +30,8 @@ ingest/      scripts de download e carga dos dados
 sql/         transformações e modelo analítico (seeds/ = tabelas de apoio)
 data/        dados brutos e tratados (não versionados)
 dashboard/   arquivo do Power BI e capturas de tela
-docs/        dicionário de KPIs e notas sobre os dados
+analises/    consultas SQL que sustentam os insights
+docs/        guia do Power BI e insights
 ```
 
 ## Como rodar
@@ -47,6 +48,16 @@ python ingest/export_powerbi.py  # gera data/powerbi/*.parquet para o Power BI
 
 Passo a passo do dashboard (relacionamentos, medidas DAX e páginas): [docs/powerbi.md](docs/powerbi.md).
 
+## Principais achados
+
+- **Santos** movimenta 16% das toneladas do comércio marítimo, mas 37% do valor FOB (US$ 1.130/t, contra US$ 144/t em São Luís).
+- Parte do volume atribuído a alguns portos é **petróleo bruto** exportado direto das plataformas (100% em Niterói, 52% no Açu).
+- Santos cresceu 5,5% em jan–ago/2026, mas **só 2,2% sem o petróleo bruto**.
+- **Soja** (mar–jun) e **milho** (ago–jan) se revezam nos terminais de granel de Santos.
+- Santos embarca **47% da celulose** exportada pelo Brasil; a China compra 46%.
+
+Detalhes e números em [docs/insights.md](docs/insights.md).
+
 ## Modelo de dados
 
 Esquema estrela em `data/berth.duckdb`:
@@ -54,7 +65,7 @@ Esquema estrela em `data/berth.duckdb`:
 | Tabela | Conteúdo |
 |---|---|
 | `fato_comercio` | Exportação e importação **por via marítima**, por mês, NCM, país, UF e unidade da Receita Federal (toneladas e valor FOB em US$) |
-| `dim_ncm` | Mercadoria com hierarquia SH2 / SH4 / seção |
+| `dim_ncm` | Mercadoria com hierarquia SH2 / SH4 / seção e grupo de carga (`sql/seeds/grupos_carga.csv`) |
 | `dim_porto` | Porto/complexo portuário, UF, região e coordenadas, a partir da unidade da Receita Federal de despacho (mapeamento em `sql/seeds/portos_urf.csv`) |
 | `dim_pais`, `dim_uf`, `dim_data` | País parceiro, estado de origem/destino e calendário |
 
